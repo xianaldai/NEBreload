@@ -109,7 +109,7 @@ public class MultiInstanceConfigHelper {
 
     public static <T extends TMultiInstanceConfig> void saveConfig(T config) {
         File configFile = checkChildDir(config).toPath().resolve(config.getFileName() + ".json").toFile();
-        CompletableFuture.runAsync(()->{
+        ConfigHelper.EXECUTOR.execute(()->{
             try {
                 FileUtils.write(configFile, GSON.toJson(config), StandardCharsets.UTF_8);
             } catch (IOException ignored) {

@@ -41,7 +41,7 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
 
     @SuppressWarnings("UnstableApiUsage")
     @Expose(serialize = false, deserialize = false)
-    public static final HashSet<String> COMMON_BLOCK_LIST = new HashSet<>() {{
+    public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
         add("minecraft:finish_configuration");
         add(PacketAggregationPacket.TYPE.id().toString());
         add("minecraft:login");
@@ -55,7 +55,7 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     }};
 
     @Expose(serialize = false, deserialize = false)
-    public static final HashSet<String> COMMON_FUZZY_BLOCK_LIST = new HashSet<>() {{
+    public static final HashSet<String> COMMON_FUZZY_BLACK_LIST = new HashSet<>() {{
         add("yes_steve_model:");
         add("allmusic:");
         add("legacy:");
@@ -67,7 +67,7 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
 
     public static boolean skipType(String type) {
         var cfg = get();
-        return (COMMON_BLOCK_LIST.contains(type) || COMMON_FUZZY_BLOCK_LIST.stream().anyMatch(type::contains)) || (cfg.compatibleMode && cfg.blackList.contains(type));
+        return (COMMON_BLACK_LIST.contains(type) || COMMON_FUZZY_BLACK_LIST.stream().anyMatch(type::contains)) || (cfg.compatibleMode && cfg.blackList.contains(type));
     }
 
     public int getContextLevel() {

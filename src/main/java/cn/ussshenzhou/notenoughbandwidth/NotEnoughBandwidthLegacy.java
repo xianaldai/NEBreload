@@ -19,11 +19,12 @@ public class NotEnoughBandwidthLegacy {
     private static final List<String> INCOMPATIBLE_MODS = List.of(
             "badpackets",
             "bandwidthoptimizer",
-            "zstd_compresser",
-            "krypton_hybrid",
-            "krypton_fnp",
             "hariplayer",
-            "zstdnet"
+            "krypton_fnp",
+            "krypton_hybrid",
+            "zstd_compresser",
+            "zstdnet",
+            "zstdmc"
     );
 
     public NotEnoughBandwidthLegacy(IEventBus modEventBus) {

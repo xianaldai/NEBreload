@@ -4,18 +4,20 @@
   "package": "cn.ussshenzhou.notenoughbandwidth.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ChunkMapMixin",
     "ConnectionMixin",
     "CustomPacketPayloadMixin",
     "DiscardedPayloadMixin",
     "NetworkRegistryMixin",
     "PacketDecoderMixin",
     "PacketEncoderMixin",
-    "PlayerListMixin",
     "Varint21FrameDecoderMixin",
     "Varint21LengthFieldPrependerMixin"
   ],
   "client": [
+  ],
+  "server": [
+    "ChunkMapMixin",
+    "PlayerListMixin"
   ],
   "injectors": {
     "defaultRequire": 1

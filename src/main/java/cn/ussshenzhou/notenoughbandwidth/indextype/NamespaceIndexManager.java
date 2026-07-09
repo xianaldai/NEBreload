@@ -247,7 +247,7 @@ public class NamespaceIndexManager {
 
         initTrace();
         if (NAMESPACES.size() > 4096 || PATHS.stream().anyMatch(l -> l.size() > 4096)) {
-            throw new RuntimeException("NEBL: There are too many namespaces and/or paths (Max 4096 namespaces, 4096 paths for each namespace). NEB is not designed to work with so many mods.");
+            throw new RuntimeException("NEBL: There are too many namespaces and/or paths (Max 4096 namespaces, 4096 paths for each namespace). NEBL is not designed to work with so many mods.");
         }
         initialized = true;
     }

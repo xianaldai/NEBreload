@@ -67,30 +67,30 @@ public class PacketAggregationPacket implements CustomPacketPayload {
      */
     @SuppressWarnings("UnstableApiUsage")
     public void encode(RegistryFriendlyByteBuf buffer) {
-        //skip GenericPacketSplitter
-        if (WALKER.walk(s -> s.anyMatch(frame -> frame.getDeclaringClass() == GenericPacketSplitter.class))) {
-            return;
-        }
+        var splitterProbe = WALKER.walk(s -> s.anyMatch(frame -> frame.getDeclaringClass() == GenericPacketSplitter.class));
         var rawBuf = new RegistryFriendlyByteBuf(ByteBufAllocator.DEFAULT.buffer(), buffer.registryAccess(), buffer.getConnectionType());
         packetsToEncode.forEach(p -> encodePackets(rawBuf, p));
 
         int rawSize = rawBuf.readableBytes();
-        boolean compress = rawSize >= 32;
+        boolean compress = !splitterProbe && rawSize >= 32;
         // B
         buffer.writeBoolean(compress);
         if (compress) {
             // S
             buffer.writeVarInt(rawSize);
             var compressedBuf = new FriendlyByteBuf(ZstdHelper.compress(connection, rawBuf));
-            logCompressRatio(rawSize, compressedBuf.readableBytes());
+            int compressedSize = compressedBuf.readableBytes();
+            logCompressRatio(rawSize, compressedSize);
             buffer.writeBytes(compressedBuf);
+            this.bakedSize = compressedSize;
             compressedBuf.release();
-            this.bakedSize = compressedBuf.readableBytes();
         } else {
             buffer.writeBytes(rawBuf);
             this.bakedSize = rawSize;
         }
-        SimpleStatManager.outRaw(rawSize);
+        if (!splitterProbe) {
+            SimpleStatManager.outRaw(rawSize);
+        }
         rawBuf.release();
     }
 
@@ -146,8 +146,9 @@ public class PacketAggregationPacket implements CustomPacketPayload {
         if (compressed) {
             // S
             int size = data.readVarInt();
+            var compressedData = data.retainedDuplicate();
             try {
-                raw = new RegistryFriendlyByteBuf(ZstdHelper.decompress(connection, data.retainedDuplicate(), size), data.registryAccess(), data.getConnectionType());
+                raw = new RegistryFriendlyByteBuf(ZstdHelper.decompress(connection, compressedData, size), data.registryAccess(), data.getConnectionType());
             } catch (Exception e) {
                 LogUtils.getLogger().error("NEBL: Failed to decompress packet aggregation from {}, clearing cache and skipping. This is expected after server switches.", connection.getRemoteAddress());
                 LogUtils.getLogger().error("NEBL: Decompression error details:", e);
@@ -155,6 +156,8 @@ public class PacketAggregationPacket implements CustomPacketPayload {
                 AggregationManager.clearCache(connection);
                 data.release();
                 return;
+            } finally {
+                compressedData.release();
             }
         } else {
             raw = new RegistryFriendlyByteBuf(data.retain(), data.registryAccess(), data.getConnectionType());

@@ -286,14 +286,16 @@ public class NamespaceIndexManager {
             PATHS.add(new ArrayList<>());
             namespaceIndex.getAndIncrement();
         }
-        PATH_MAPS.compute(namespaceIndex.get() - 1, (namespaceId1, pathMap) -> {
+        int namespaceId = NAMESPACE_MAP.getInt(packetId.getNamespace());
+        PATH_MAPS.compute(namespaceId, (namespaceId1, pathMap) -> {
             if (pathMap == null) {
                 pathMap = new Object2IntOpenHashMap<>();
+                pathMap.defaultReturnValue(-1);
             }
             pathMap.put(packetId.getPath(), pathMap.size());
             return pathMap;
         });
-        PATHS.get(namespaceIndex.get() - 1).add(packetId.getPath());
+        PATHS.get(namespaceId).add(packetId.getPath());
     }
 
     public static boolean contains(ResourceLocation type) {

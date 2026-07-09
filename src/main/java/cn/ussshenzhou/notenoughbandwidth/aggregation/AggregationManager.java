@@ -51,10 +51,8 @@ public class AggregationManager {
     }
 
     public synchronized static void flushConnection(Connection connection) {
-        TIMER.execute(() -> {
-            PACKET_BUFFER.entrySet().removeIf(e -> !e.getKey().isConnected());
-            flushInternal(connection, PACKET_BUFFER.get(connection));
-        });
+        PACKET_BUFFER.entrySet().removeIf(e -> !e.getKey().isConnected());
+        flushInternal(connection, PACKET_BUFFER.get(connection));
     }
 
     private synchronized static void flushInternal(Connection connection, @Nullable ArrayList<AggregatedEncodePacket> packets) {
@@ -68,12 +66,12 @@ public class AggregationManager {
                 return;
             }
             var sendPackets = new ArrayList<>(packets);
+            packets.clear();
             connection.send(connection.getSending() == PacketFlow.CLIENTBOUND
                             ? new ClientboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, encoder.getProtocolInfo(), connection))
                             : new ServerboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, encoder.getProtocolInfo(), connection)),
                     null, true
             );
-            packets.clear();
             connection.flushChannel();
         } catch (Exception e) {
             LogUtils.getLogger().error("NEBL: Skipped: Failed to flush packets.", e);

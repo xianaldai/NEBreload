@@ -7,6 +7,7 @@
     "ChunkMapMixin",
     "ConnectionMixin",
     "CustomPacketPayloadMixin",
+    "DiscardedPayloadMixin",
     "NetworkRegistryMixin",
     "PacketDecoderMixin",
     "PacketEncoderMixin",

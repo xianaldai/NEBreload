@@ -81,7 +81,7 @@ public class ZstdHelper {
             return true;
         }
         var uuid = to.getUUID();
-        var use = NotEnoughBandwidthLegacyConfig.get().playersDoNotUseContext.contains(uuid.toString());
+        var use = !NotEnoughBandwidthLegacyConfig.get().playersDoNotUseContext.contains(uuid.toString());
         CONNECTION_USE_CONTEXT.put(connection, use);
         return use;
     }

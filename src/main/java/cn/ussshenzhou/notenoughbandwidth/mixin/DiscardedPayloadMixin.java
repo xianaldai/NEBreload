@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(DiscardedPayload.class)
 public class DiscardedPayloadMixin {
 
-    @ModifyVariable(method = "lambda$codec$1", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    @ModifyVariable(method = "lambda$codec$1", at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
     private static int neblUseConfiguredClientboundPayloadLimit(int maxSize) {
         if (maxSize != 1_048_576) {
             return maxSize;

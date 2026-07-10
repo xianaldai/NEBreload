@@ -1,2 +1,6 @@
-nebl-21.1.08-neoforge+1.21.1:
-Update incompatible mod list.
+nebl-21.1.09-neoforge+1.21.1:
+Update incompatible mod list;
+Fix custom payload aggregation disconnects #26 ;
+The configuration file may become corrupted due to multithreaded operations;
+To improve compatibility, DCC is now only enabled on dedicated servers;
+Added support for ReplayMod's recording and playback features in both single-player and multiplayer games.

@@ -42,9 +42,17 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     @SuppressWarnings("UnstableApiUsage")
     @Expose(serialize = false, deserialize = false)
     public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
-        add("minecraft:finish_configuration");
-        add(PacketAggregationPacket.TYPE.id().toString());
         add("minecraft:login");
+        add("minecraft:finish_configuration");
+        add("minecraft:move_entity_pos");
+        add("minecraft:move_entity_pos_rot");
+        add("minecraft:move_entity_rot");
+        add("minecraft:move_vehicle");
+        add("minecraft:move_player_pos");
+        add("minecraft:move_player_pos_rot");
+        add("minecraft:move_player_rot");
+        add("minecraft:move_player_status_only");
+        add(PacketAggregationPacket.TYPE.id().toString());
         add(MinecraftRegisterPayload.ID.toString());
         add(MinecraftUnregisterPayload.ID.toString());
         add(ModdedNetworkQueryPayload.ID.toString());

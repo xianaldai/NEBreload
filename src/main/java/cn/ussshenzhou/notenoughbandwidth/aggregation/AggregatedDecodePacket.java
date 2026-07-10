@@ -1,6 +1,8 @@
 package cn.ussshenzhou.notenoughbandwidth.aggregation;
 
 import com.mojang.logging.LogUtils;
+
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModCompat;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import net.minecraft.network.ConnectionProtocol;
@@ -58,6 +60,7 @@ public class AggregatedDecodePacket {
         var entry = vanillaCodec.byId.get(id);
         var codec = (StreamCodec<ByteBuf, Packet<?>>) entry.serializer();
         var truePacket = (Packet<ICommonPacketListener>) codec.decode(data);
+        ReplayModCompat.captureSubPacket(truePacket);
         context.enqueueWork(() -> truePacket.handle(context.listener()));
         return true;
     }

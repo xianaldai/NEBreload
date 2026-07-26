@@ -35,6 +35,7 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     public String maxPacketSize = "4MB";
     @Expose(serialize = false, deserialize = false)
     private int maxPacketSizeByte = -1;
+    public boolean streaming = false;
     public HashSet<String> playersDoNotUseContext = new HashSet<>() {{
         add("00000000-0000-0000-0000-000000000000");
     }};

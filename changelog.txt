@@ -1,6 +1,3 @@
-nebl-21.1.09-neoforge+1.21.1:
-Update incompatible mod list;
-Fix custom payload aggregation disconnects #26 ;
-The configuration file may become corrupted due to multithreaded operations;
-To improve compatibility, DCC is now only enabled on dedicated servers;
-Added support for ReplayMod's recording and playback features in both single-player and multiplayer games.
+nebl-21.1.10-neoforge+1.21.1:
+Fixed compatibility support for Android clients (PojavLauncher, FoldCraftLauncher, etc.);
+Added a streaming transfer configuration option, defaulting to false. Enabling it can save more bandwidth, but may cause game disconnections due to corrupted data transmission caused by network fluctuations.

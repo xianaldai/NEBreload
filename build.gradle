@@ -118,7 +118,7 @@ dependencies {
     // Example project dependency using a sister or child project:
     // implementation project(":myproject")
 
-    runtimeOnly "maven.modrinth:packet-fixer:${packetfixer_id}"
+    compileOnly "maven.modrinth:packet-fixer:${packetfixer_id}"
     jarJar(implementation("com.github.luben:zstd-jni:1.5.7-7"))
     additionalRuntimeClasspath "com.github.luben:zstd-jni:1.5.7-7"
 

@@ -46,13 +46,6 @@ public class Context implements Closeable {
     }
 
     public ByteBuffer decompress(ByteBuffer compressed, int originalSize) {
-        if (AndroidZstdNativeLoader.DIRECT_BUFFER_UNRELIABLE) {
-            byte[] compressedArr = new byte[compressed.remaining()];
-            compressed.get(compressedArr);
-            byte[] dstArr = new byte[originalSize];
-            decompressCtx.decompress(dstArr, compressedArr);
-            return ByteBuffer.wrap(dstArr);
-        }
         var dst = ByteBuffer.allocateDirect(originalSize);
         decompressCtx.decompressDirectByteBufferStream(dst, compressed);
         dst.flip();

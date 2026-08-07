@@ -2,6 +2,7 @@ package cn.ussshenzhou.notenoughbandwidth.aggregation;
 
 import com.mojang.logging.LogUtils;
 
+import cn.ussshenzhou.notenoughbandwidth.chunk.ClientChunkCache;
 import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModCompat;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
@@ -13,6 +14,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.common.ServerCommonPacketListener;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -59,7 +61,18 @@ public class AggregatedDecodePacket {
         }
         var entry = vanillaCodec.byId.get(id);
         var codec = (StreamCodec<ByteBuf, Packet<?>>) entry.serializer();
+        int dataLength = data.readableBytes();
         var truePacket = (Packet<ICommonPacketListener>) codec.decode(data);
+        @SuppressWarnings("rawtypes")
+        Packet rawPacket = truePacket;
+        if (rawPacket instanceof ClientboundLevelChunkWithLightPacket chunkPacket
+                && context.listener() instanceof ClientCommonPacketListener
+                && dataLength >= ClientChunkCache.minBytes()) {
+            ClientChunkCache cache = ClientChunkCache.get(context.connection());
+            if (cache != null) {
+                cache.put(chunkPacket.getX(), chunkPacket.getZ(), chunkPacket, dataLength);
+            }
+        }
         ReplayModCompat.captureSubPacket(truePacket);
         context.enqueueWork(() -> truePacket.handle(context.listener()));
         return true;

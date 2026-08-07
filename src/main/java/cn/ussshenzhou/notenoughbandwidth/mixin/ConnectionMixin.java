@@ -2,6 +2,8 @@ package cn.ussshenzhou.notenoughbandwidth.mixin;
 
 import cn.ussshenzhou.notenoughbandwidth.NotEnoughBandwidthLegacyConfig;
 import cn.ussshenzhou.notenoughbandwidth.aggregation.AggregationManager;
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModCompat;
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.RecordingStatusManager;
 import cn.ussshenzhou.notenoughbandwidth.util.PacketUtil;
 import io.netty.channel.local.LocalAddress;
 import net.minecraft.network.Connection;
@@ -16,6 +18,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import java.net.SocketAddress;
 
@@ -40,7 +44,15 @@ public abstract class ConnectionMixin {
         if (this.getRemoteAddress() instanceof LocalAddress || this.packetListener == null || this.packetListener.protocol() != ConnectionProtocol.PLAY) {
             return;
         }
-        if (NotEnoughBandwidthLegacyConfig.skipType(PacketUtil.getTrueType(packet).toString())) {
+        var connection = (Connection) (Object) this;
+        String type = PacketUtil.getTrueType(packet).toString();
+        if (NotEnoughBandwidthLegacyConfig.bypassType(type)) {
+            return;
+        }
+        boolean recordingMovementPacket = NotEnoughBandwidthLegacyConfig.MOVEMENT_PACKETS.contains(type)
+                && (FMLEnvironment.dist == Dist.CLIENT && ReplayModCompat.isRecordingActive()
+                || FMLEnvironment.dist == Dist.DEDICATED_SERVER && RecordingStatusManager.isRecording(connection));
+        if (NotEnoughBandwidthLegacyConfig.skipType(type) || recordingMovementPacket) {
             AggregationManager.flushConnection((Connection) (Object) this);
             return;
         }
@@ -51,5 +63,24 @@ public abstract class ConnectionMixin {
         }
         AggregationManager.takeOver(packet, (Connection) (Object) this);
         ci.cancel();
+    }
+
+    @Inject(method = "exceptionCaught(Lio/netty/channel/ChannelHandlerContext;Ljava/lang/Throwable;)V", at = @At("HEAD"), cancellable = true)
+    private void neblIgnoreRecordingStatusEncodeFailure(io.netty.channel.ChannelHandlerContext ctx, Throwable cause, CallbackInfo ci) {
+        if (isNeblPayloadEncodeFailure(cause)) {
+            ci.cancel();
+        }
+    }
+
+    private static boolean isNeblPayloadEncodeFailure(Throwable cause) {
+        Throwable t = cause;
+        while (t != null) {
+            String msg = t.getMessage();
+            if (msg != null && msg.startsWith("Failed encoding custom payload nebl:")) {
+                return true;
+            }
+            t = t.getCause();
+        }
+        return false;
     }
 }

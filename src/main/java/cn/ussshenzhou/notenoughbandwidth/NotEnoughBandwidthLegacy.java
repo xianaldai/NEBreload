@@ -17,7 +17,6 @@ import java.util.List;
 @Mod(ModConstants.MOD_ID)
 public class NotEnoughBandwidthLegacy {
     private static final List<String> INCOMPATIBLE_MODS = List.of(
-            "badpackets",
             "bandwidthoptimizer",
             "hariplayer",
             "krypton_fnp",

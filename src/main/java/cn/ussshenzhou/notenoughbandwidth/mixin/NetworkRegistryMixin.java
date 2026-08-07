@@ -1,6 +1,9 @@
 package cn.ussshenzhou.notenoughbandwidth.mixin;
 
 import cn.ussshenzhou.notenoughbandwidth.aggregation.AggregationManager;
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModCompat;
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModRecordingStatusPayload;
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.RecordingStatusManager;
 import cn.ussshenzhou.notenoughbandwidth.indextype.NamespaceIndexManager;
 import cn.ussshenzhou.notenoughbandwidth.zstd.ZstdHelper;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -31,6 +34,7 @@ public class NetworkRegistryMixin {
     @Inject(method = "initializeNeoForgeConnection(Lnet/minecraft/network/protocol/configuration/ServerConfigurationPacketListener;Ljava/util/Map;)V", at = @At("TAIL"))
     private static void neblServerInitialize(ServerConfigurationPacketListener listener, Map<ConnectionProtocol, Set<ModdedNetworkQueryComponent>> clientChannels, CallbackInfo ci, @Local(name = "setup") NetworkPayloadSetup setup) {
         Connection connection = listener.getConnection();
+        RecordingStatusManager.remove(connection);
         ZstdHelper.clearCache(connection);
         AggregationManager.clearCache(connection);
         NamespaceIndexManager.init(new ArrayList<>(setup.channels().get(ConnectionProtocol.PLAY).keySet()));
@@ -41,6 +45,10 @@ public class NetworkRegistryMixin {
     @Inject(method = "initializeNeoForgeConnection(Lnet/minecraft/network/protocol/configuration/ClientConfigurationPacketListener;Lnet/neoforged/neoforge/network/registration/NetworkPayloadSetup;)V", at = @At("TAIL"))
     private static void neblClientInitialize(ClientConfigurationPacketListener listener, NetworkPayloadSetup setup, CallbackInfo ci) {
         Connection connection = listener.getConnection();
+        ReplayModCompat.setClientConnection(connection);
+        var playChannels = setup.channels().get(ConnectionProtocol.PLAY);
+        ReplayModCompat.setServerSupportsNebl(playChannels != null && playChannels.containsKey(ReplayModRecordingStatusPayload.TYPE.id()));
+        RecordingStatusManager.remove(connection);
         ZstdHelper.clearCache(connection);
         AggregationManager.clearCache(connection);
         NamespaceIndexManager.init(new ArrayList<>(setup.channels().get(ConnectionProtocol.PLAY).keySet()));

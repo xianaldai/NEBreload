@@ -35,6 +35,18 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     public String maxPacketSize = "4MB";
     @Expose(serialize = false, deserialize = false)
     private int maxPacketSizeByte = -1;
+    public int loginTimeoutSeconds = 180;
+    public int connectionTimeoutSeconds = 180;
+    public boolean packetDictionaryEnabled = true;
+    public int packetDictionaryMaxPacketBytes = 4096;
+    public int packetDictionaryMaxEntries = 8192;
+    public int packetDictionaryMaxPayloadBytes = 1048576;
+    public int packetDictionaryMaxDiffRuns = 8;
+    public int packetDictionaryMaxChangedBytes = 128;
+    public boolean chunkReferenceEnabled = true;
+    public int chunkReferenceMaxServerEntries = 4096;
+    public int chunkReferenceMaxClientCache = 2048;
+    public int chunkReferenceMinBytes = 4096;
     public boolean streaming = false;
     public HashSet<String> playersDoNotUseContext = new HashSet<>() {{
         add("00000000-0000-0000-0000-000000000000");
@@ -42,17 +54,9 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
 
     @SuppressWarnings("UnstableApiUsage")
     @Expose(serialize = false, deserialize = false)
-    public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
+public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
         add("minecraft:login");
         add("minecraft:finish_configuration");
-        add("minecraft:move_entity_pos");
-        add("minecraft:move_entity_pos_rot");
-        add("minecraft:move_entity_rot");
-        add("minecraft:move_vehicle");
-        add("minecraft:move_player_pos");
-        add("minecraft:move_player_pos_rot");
-        add("minecraft:move_player_rot");
-        add("minecraft:move_player_status_only");
         add(PacketAggregationPacket.TYPE.id().toString());
         add(MinecraftRegisterPayload.ID.toString());
         add(MinecraftUnregisterPayload.ID.toString());
@@ -64,10 +68,28 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     }};
 
     @Expose(serialize = false, deserialize = false)
+    public static final HashSet<String> COMMON_BYPASS_LIST = new HashSet<>() {{
+        add("minecraft:ping_request");
+        add("minecraft:pong_response");
+    }};
+
+    @Expose(serialize = false, deserialize = false)
     public static final HashSet<String> COMMON_FUZZY_BLACK_LIST = new HashSet<>() {{
         add("yes_steve_model:");
         add("allmusic:");
         add("legacy:");
+    }};
+
+    @Expose(serialize = false, deserialize = false)
+    public static final HashSet<String> MOVEMENT_PACKETS = new HashSet<>() {{
+        add("minecraft:move_entity_pos");
+        add("minecraft:move_entity_pos_rot");
+        add("minecraft:move_entity_rot");
+        add("minecraft:move_vehicle");
+        add("minecraft:move_player_pos");
+        add("minecraft:move_player_pos_rot");
+        add("minecraft:move_player_rot");
+        add("minecraft:move_player_status_only");
     }};
 
     public static NotEnoughBandwidthLegacyConfig get() {
@@ -77,6 +99,10 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     public static boolean skipType(String type) {
         var cfg = get();
         return (COMMON_BLACK_LIST.contains(type) || COMMON_FUZZY_BLACK_LIST.stream().anyMatch(type::contains)) || (cfg.compatibleMode && cfg.blackList.contains(type));
+    }
+
+    public static boolean bypassType(String type) {
+        return COMMON_BYPASS_LIST.contains(type);
     }
 
     public int getContextLevel() {

@@ -1,5 +1,6 @@
 package cn.ussshenzhou.notenoughbandwidth.aggregation;
 
+import cn.ussshenzhou.notenoughbandwidth.compat.replaymod.ReplayModCompat;
 import cn.ussshenzhou.notenoughbandwidth.util.DefaultChannelPipelineHelper;
 import cn.ussshenzhou.notenoughbandwidth.util.PacketUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -10,6 +11,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -47,6 +50,9 @@ public class AggregationManager {
 
     private synchronized static void flush() {
         PACKET_BUFFER.entrySet().removeIf(e -> !e.getKey().isConnected());
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ReplayModCompat.tickRecordingStatus();
+        }
         PACKET_BUFFER.forEach(AggregationManager::flushInternal);
     }
 
@@ -67,9 +73,11 @@ public class AggregationManager {
             }
             var sendPackets = new ArrayList<>(packets);
             packets.clear();
-            connection.send(connection.getSending() == PacketFlow.CLIENTBOUND
-                            ? new ClientboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, encoder.getProtocolInfo(), connection))
-                            : new ServerboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, encoder.getProtocolInfo(), connection)),
+            var protocolInfo = encoder.getProtocolInfo();
+            var flow = connection.getSending();
+            connection.send(flow == PacketFlow.CLIENTBOUND
+                            ? new ClientboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, protocolInfo, connection))
+                            : new ServerboundCustomPayloadPacket(new PacketAggregationPacket(sendPackets, protocolInfo, connection)),
                     null, true
             );
             connection.flushChannel();

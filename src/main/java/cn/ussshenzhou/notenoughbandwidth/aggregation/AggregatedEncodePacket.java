@@ -42,6 +42,22 @@ public class AggregatedEncodePacket {
         this.type = type;
     }
 
+    public boolean isMinecraft() {
+        return isMinecraft;
+    }
+
+    public Packet<?> getRawPacket() {
+        return packet;
+    }
+
+    public CustomPacketPayload getPayload() {
+        return payload;
+    }
+
+    public Packet<?> getVanillaPacket() {
+        return isMinecraft ? packet : null;
+    }
+
     public void encode(ByteBuf buf, ProtocolInfo<?> protocolInfo, PacketFlow packetFlow) {
         if (isMinecraft) {
             encodeVanilla(buf, protocolInfo);

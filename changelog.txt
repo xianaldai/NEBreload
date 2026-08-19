@@ -1,5 +1,4 @@
-nebl-21.1.11-neoforge+1.21.1:
-Optimize mod compatibility and latency display;
-Fixed an encoding-side issue that could freeze the game when aggregating very large batches;
-Added loginTimeoutSeconds and connectionTimeoutSeconds to extend the vanilla login, read, and keep-alive timeouts for large modpacks;
-Added a packet dictionary with exact and template references, and a chunk reference layer with client-side chunk caching, to avoid re-sending unchanged data.
+nebl-21.1.12-neoforge+1.21.1:
+Optimize plugin server latency display;
+Update chunk reference cache defaults to 8192 for both server and client;
+Add configVersion and automatic one-time migration of existing config files to the new defaults;

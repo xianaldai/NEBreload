@@ -15,7 +15,10 @@ import java.util.regex.Pattern;
  * @author USS_Shenzhou
  */
 public class NotEnoughBandwidthLegacyConfig implements TConfig {
-
+    
+    public static final double CURRENT_CONFIG_VERSION = 1.0;
+    
+    public double configVersion = 0;
     public boolean compatibleMode = false;
     public HashSet<String> blackList = new HashSet<>() {{
         add("minecraft:command_suggestion");
@@ -44,8 +47,8 @@ public class NotEnoughBandwidthLegacyConfig implements TConfig {
     public int packetDictionaryMaxDiffRuns = 8;
     public int packetDictionaryMaxChangedBytes = 128;
     public boolean chunkReferenceEnabled = true;
-    public int chunkReferenceMaxServerEntries = 4096;
-    public int chunkReferenceMaxClientCache = 2048;
+    public int chunkReferenceMaxServerEntries = 8192;
+    public int chunkReferenceMaxClientCache = 8192;
     public int chunkReferenceMinBytes = 4096;
     public boolean streaming = false;
     public HashSet<String> playersDoNotUseContext = new HashSet<>() {{
@@ -68,16 +71,17 @@ public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
     }};
 
     @Expose(serialize = false, deserialize = false)
-    public static final HashSet<String> COMMON_BYPASS_LIST = new HashSet<>() {{
-        add("minecraft:ping_request");
-        add("minecraft:pong_response");
-    }};
-
-    @Expose(serialize = false, deserialize = false)
     public static final HashSet<String> COMMON_FUZZY_BLACK_LIST = new HashSet<>() {{
         add("yes_steve_model:");
         add("allmusic:");
         add("legacy:");
+    }};
+
+    @Expose(serialize = false, deserialize = false)
+    public static final HashSet<String> COMMON_BYPASS_LIST = new HashSet<>() {{
+        add("minecraft:ping_request");
+        add("minecraft:pong_response");
+        add("minecraft:keep_alive");
     }};
 
     @Expose(serialize = false, deserialize = false)
@@ -94,6 +98,24 @@ public static final HashSet<String> COMMON_BLACK_LIST = new HashSet<>() {{
 
     public static NotEnoughBandwidthLegacyConfig get() {
         return ConfigHelper.getConfigRead(NotEnoughBandwidthLegacyConfig.class);
+    }
+
+    @Override
+    public void migrate() {
+        // configVersion Log:
+        // null -> 1.0:
+        // - chunkReferenceMaxServerEntries: 4096 -> 8192
+        // - chunkReferenceMaxClientCache: 2048 -> 8192
+        if (configVersion >= CURRENT_CONFIG_VERSION) {
+            return;
+        }
+        if (chunkReferenceMaxServerEntries == 4096) {
+            chunkReferenceMaxServerEntries = 8192;
+        }
+        if (chunkReferenceMaxClientCache == 2048) {
+            chunkReferenceMaxClientCache = 8192;
+        }
+        configVersion = CURRENT_CONFIG_VERSION;
     }
 
     public static boolean skipType(String type) {

@@ -120,6 +120,17 @@ Additionally, the server fingerprints and records sent chunk packets while the c
 
 Modify the configuration file at `config/NotEnoughBandwidthLegacyConfig.json`.
 
+### configVersion
+
+> [!WARNING]
+> **该值由 NEBL 自动维护，请勿手动修改。**
+>
+> THIS VALUE IS AUTO-MAINTAINED BY NEBL. DO NOT EDIT.
+
+配置文件的版本号，用于 NEBL 维护配置文件的默认值。
+
+The version number of the config file, used by NEBL to maintain the defaults of the config file.
+
 ### compatibleMode
 
 > [!NOTE]
@@ -311,9 +322,9 @@ Whether to enable the chunk reference layer. When enabled, the server fingerprin
 >
 > ONLY WORK ON SERVER.
 
-服务端区块引用表最多保存的区块数量，默认`4096`。按最近使用（LRU）顺序淘汰。
+服务端区块引用表最多保存的区块数量，默认`8192`。按最近使用（LRU）顺序淘汰。
 
-The maximum number of chunk entries kept in the server-side chunk reference table. Default is `4096`. Entries are evicted by least-recently-used (LRU) order.
+The maximum number of chunk entries kept in the server-side chunk reference table. Default is `8192`. Entries are evicted by least-recently-used (LRU) order.
 
 ### chunkReferenceMaxClientCache
 
@@ -322,9 +333,9 @@ The maximum number of chunk entries kept in the server-side chunk reference tabl
 >
 > ONLY WORK ON CLIENT.
 
-客户端最多缓存的完整区块包数量，默认`2048`。按最近使用（LRU）顺序淘汰。
+客户端最多缓存的完整区块包数量，默认`8192`。按最近使用（LRU）顺序淘汰。
 
-The maximum number of full chunk packets cached on the client. Default is `2048`. Entries are evicted by least-recently-used (LRU) order.
+The maximum number of full chunk packets cached on the client. Default is `8192`. Entries are evicted by least-recently-used (LRU) order.
 
 ### chunkReferenceMinBytes
 
